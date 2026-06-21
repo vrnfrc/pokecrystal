@@ -1,40 +1,46 @@
 # Itinerary Quiz
 
-Conduct the following quiz to build the story itinerary. Repeat the loop until the user selects **Stop**.
+Conduct the following quiz to build the story itinerary using the **opencode `question` tool** — **always** use it. The first question uses an **empty `options` array** (the "Type your own answer" field is added automatically by the tool) so the user types the map name freely. The user stops the quiz manually when done.
 
 ## Loop
 
-1. Ask a multi-answer question with these options:
-   - **Insert next map** — add a map to the itinerary (routes, cities, etc.)
-   - **Unlock MN map** — unlock a map previously inaccessible due to a missing requirement (e.g. a Hidden Machine like Surf)
-   - **Stop** — finish the quiz
+Each step uses a **single `question` tool call with three questions** (three entries in the `questions` array). Before prompting, remind the user of the **current difficulty** — this is always the **last NUMERIC difficulty** (skipping any `-` steps), or `none` if no numeric difficulty has been set yet. Showing `-` here is not useful since it doesn't convey the point in the game; the numeric curve is what matters.
 
-   Use the `question` tool with `multiple: true`. Always include **Stop** in the list. If the user picks **Stop** alongside other options, treat it as terminating the quiz and discard the other selections.
+1. **Map name** — `options: []` (free text only via the auto-added "Type your own answer" field; no brackets, no preset name).
 
-2. For each map selected (in the order the user listed them), ask (single free-text prompt):
-   ```
-   Map: <name> | Requirement: <HM/move or `-`> | Difficulty: <integer or `-`>
-   ```
-   - **Map**: name/identifier (free text).
-   - **Requirement**: only for "Unlock MN map" picks — e.g. `Surf`, `Cut`, `Strength`, `Waterfall`, `Flash`. Use `-` otherwise.
-   - **Difficulty**: a single integer (e.g. `1`, `2`, `3`, ...), or `-` for maps with no wild encounters. The number is up to the user — they decide when to increment it and by how much. Track the current difficulty in memory and remind the user of it before each prompt.
+2. **Type** (single-select). Options (exactly as specified):
+   - **Standard map** — Insert next map (Requirement = `-`).
+   - **Unlocked by MN01 (Cut)** — Requirement = `Cut`.
+   - **Unlocked by MN03 (Surf)** — Requirement = `Surf`.
+   - **Unlocked by MN04 (Strength)** — Requirement = `Strength`.
+   - **Unlocked by MN06 (Whirlpool)** — Requirement = `Whirlpool`.
+   - **Unlocked by MN07 (Waterfall)** — Requirement = `Waterfall`.
+   - **Unlocked by MT08 (Rock Smash)** — Requirement = `Rock Smash`.
 
-3. Append an entry to `ITINERARY.md` in the following format:
+3. **Difficulty** (single-select — "Type your own answer" available by default for custom values):
+   - **Current: \<value\>** — accept the last **NUMERIC** difficulty (skipping `-` steps). Omit when no numeric difficulty has been set yet.
+   - **Bump by 1** — increment the last numeric difficulty by 1.
+   - **`-`** — no difficulty (for cities or maps gated behind a future unlock).
+
+   The selected value becomes the map's difficulty. The **last numeric difficulty** is updated to the selected value if and only if it is numeric (i.e. a `-` selection does not clear or change the tracked last-numeric value — that value is preserved from the most recent numeric step).
+
+4. From the answers, determine: **Map** (Q1), **Type** and **Requirement** (Q2), **Difficulty** (Q3).
+
+5. Append an entry to `ITINERARY.md`:
 
    ```markdown
-   ## Step N — <Insert next map | Unlock MN map>
+   ## Step N
 
    - **Map**: <name>
    - **Requirement**: <HM/move or `-`>
    - **Difficulty**: <integer> or `-`
    ```
 
-   **Difficulty** is a single integer that grows as the user decides to raise it. Use `-` for cities and for maps whose encounters are gated behind a move that will be unlocked later (e.g. a city with surfable water that needs `Surf`); the same map can be revisited later with a real integer once the gating move is acquired.
-
-4. Increment the step counter and return to step 1.
+6. Increment the step counter and return to step 1.
 
 ## Notes
 
 - The user may rename or re-order steps later; the format above is the canonical shape.
 - The user owns the difficulty curve — the quiz does not enforce monotonicity, only reminds the user of the current value.
 - Trainers are not configured by this quiz — only their reference difficulty.
+- When editing a step in the middle of the list, show context: the **precedent step's** difficulty and the **following step's** difficulty if any. For context, use the **last numeric** difficulty (skipping `-`) on each side, so the user sees the numeric curve.
