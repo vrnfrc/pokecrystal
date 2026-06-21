@@ -11,10 +11,13 @@ Conduct the following quiz to build the story itinerary. Repeat the loop until t
 
    Use the `question` tool with `multiple: true`. Always include **Stop** in the list. If the user picks **Stop** alongside other options, treat it as terminating the quiz and discard the other selections.
 
-2. For each map selected (in the order the user listed them), ask:
-   - **Map name / identifier** (free text)
-   - **Requirement** (only for "Unlock MN map" picks — e.g. `Surf`, `Cut`, `Strength`, `Waterfall`, `Flash`)
-   - **Difficulty**: a level range for wild encounters (e.g. `3-5`, `12-14`), or `-` if the map has no wild encounters (cities, or maps with encounters gated behind a move unlocked later). Trainers will use this as a reference but be a bit stronger.
+2. For each map selected (in the order the user listed them), ask (single free-text prompt):
+   ```
+   Map: <name> | Requirement: <HM/move or `-`> | Difficulty: <integer or `-`>
+   ```
+   - **Map**: name/identifier (free text).
+   - **Requirement**: only for "Unlock MN map" picks — e.g. `Surf`, `Cut`, `Strength`, `Waterfall`, `Flash`. Use `-` otherwise.
+   - **Difficulty**: a single integer (e.g. `1`, `2`, `3`, ...), or `-` for maps with no wild encounters. The number is up to the user — they decide when to increment it and by how much. Track the current difficulty in memory and remind the user of it before each prompt.
 
 3. Append an entry to `ITINERARY.md` in the following format:
 
@@ -23,15 +26,15 @@ Conduct the following quiz to build the story itinerary. Repeat the loop until t
 
    - **Map**: <name>
    - **Requirement**: <HM/move or `-`>
-   - **Difficulty**: <min>-<max> or `-`
+   - **Difficulty**: <integer> or `-`
    ```
 
-   **Difficulty** may be `-` (no wild encounters). Use this for cities, and for maps whose encounters are gated behind a move that is unlocked in a later step (e.g. a city with surfable water that needs `Surf`). The same map will receive a real range in a later step when the gating move is acquired.
+   **Difficulty** is a single integer that grows as the user decides to raise it. Use `-` for cities and for maps whose encounters are gated behind a move that will be unlocked later (e.g. a city with surfable water that needs `Surf`); the same map can be revisited later with a real integer once the gating move is acquired.
 
 4. Increment the step counter and return to step 1.
 
 ## Notes
 
 - The user may rename or re-order steps later; the format above is the canonical shape.
-- Difficulty strictly increases across the itinerary. Do not allow a later step to be easier than an earlier one; if the user proposes one, confirm before accepting.
-- Trainers are not configured by this quiz — only their reference level range.
+- The user owns the difficulty curve — the quiz does not enforce monotonicity, only reminds the user of the current value.
+- Trainers are not configured by this quiz — only their reference difficulty.
