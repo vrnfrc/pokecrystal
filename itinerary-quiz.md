@@ -6,7 +6,7 @@ Conduct the following quiz to build the story itinerary using the **opencode `qu
 
 Each step uses a **single `question` tool call with three questions** (three entries in the `questions` array). Before prompting, remind the user of the **current difficulty** — this is always the **last NUMERIC difficulty** (skipping any `-` steps), or `none` if no numeric difficulty has been set yet. Showing `-` here is not useful since it doesn't convey the point in the game; the numeric curve is what matters.
 
-1. **Map name** — `options: []` (free text only via the auto-added "Type your own answer" field; no brackets, no preset name).
+1. **Map name** — `options: []` (free text only via the auto-added "Type your own answer" field; no brackets, no preset name). To add **multiple maps in a single step** (sharing the same type/requirement and difficulty), separate them with `, ` (e.g. `Union Cave 1F, Union Cave B1F`).
 
 2. **Type** (single-select). Options (exactly as specified):
    - **Standard map** — Insert next map (Requirement = `-`).
@@ -24,17 +24,20 @@ Each step uses a **single `question` tool call with three questions** (three ent
 
    The selected value becomes the map's difficulty. The **last numeric difficulty** is updated to the selected value if and only if it is numeric (i.e. a `-` selection does not clear or change the tracked last-numeric value — that value is preserved from the most recent numeric step).
 
-4. From the answers, determine: **Map** (Q1), **Type** and **Requirement** (Q2), **Difficulty** (Q3).
+4. From the answers, determine: **Map(s)** (Q1 — may be multiple, comma-separated), **Type** and **Requirement** (Q2 — shared by all maps in the step), **Difficulty** (Q3 — shared by all maps in the step).
 
-5. Append an entry to `ITINERARY.md`:
+5. Append an entry to `ITINERARY.md`. A step can contain **multiple maps** (all sharing the same Requirement and Difficulty):
 
    ```markdown
    ## Step N
 
-   - **Map**: <name>
+   - **Map**: <name1>
+   - **Map**: <name2>
    - **Requirement**: <HM/move or `-`>
    - **Difficulty**: <integer> or `-`
    ```
+
+   For a single-map step, only one `**Map**` line is used.
 
 6. Increment the step counter and return to step 1.
 

@@ -59,3 +59,10 @@
 - **Map**: Route 32
 - **Requirement**: `-`
 - **Difficulty**: `6`
+
+## Step 11
+
+- **Map**: Union Cave 1F
+- **Map**: Union Cave B1F
+- **Requirement**: `-`
+- **Difficulty**: `7`
